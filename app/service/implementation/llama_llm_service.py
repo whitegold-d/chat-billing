@@ -3,8 +3,11 @@ from typing import cast
 from langchain_core.messages import AIMessage
 from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
 
-from api.schema import AnswerDTO, LLMService, QuestionDTO
+from app.interface.http.model.request.llm_request_dto import QuestionDTO
+from app.interface.http.model.response.llm_response_dto import AnswerDTO
+from app.service.interface.llm_service import LLMService
 
 
 class CustomLLMService(LLMService):
@@ -14,7 +17,8 @@ class CustomLLMService(LLMService):
 
     def __init__(self, model_name: str, ollama_base_url: str):
         llm = ChatOpenAI(model=model_name,
-                         base_url=f"{ollama_base_url}/v1")
+                         base_url=f"{ollama_base_url}/v1",
+                         api_key=SecretStr('ollama'))
         prompt = ChatPromptTemplate.from_messages(self._MESSAGES)
         self.chain = prompt | llm
 

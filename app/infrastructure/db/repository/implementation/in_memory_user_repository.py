@@ -8,7 +8,7 @@ from uuid import UUID
 
 
 class InMemoryUserRepository(UserRepository):
-    users: List[UserResponse]
+    users = []
 
     async def get_user_by_id(self, user_id: str) -> Optional[UserResponse]:
         for user in self.users:
@@ -31,10 +31,10 @@ class InMemoryUserRepository(UserRepository):
 
 
     async def save_user(self, new_user: UserRequest) -> UserResponse:
-        new_user = UserResponse(
+        user = UserResponse(
             id = UUID(),
             name=new_user.name,
             login=new_user.login,
             hashed_password=new_user.hashed_password)
-        self.users.append(new_user)
-        return new_user
+        self.users.append(user)
+        return user

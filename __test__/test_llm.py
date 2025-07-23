@@ -1,11 +1,11 @@
 import asyncio
 
 from app.interface.http.model.request.llm_request_dto import QuestionDTO
-from app.service.implementation.llama_llm_service import CustomLLMService
+from app.service.implementation.llama_llm_service import LlamaLLMService
 
 
 async def main():
-    llm_service = CustomLLMService(
+    llm_service = LlamaLLMService(
         model_name="deepseek-r1:8b",
         ollama_base_url="http://localhost:11434")
     answer = await llm_service.execute(QuestionDTO(text="Hi, how are you?", history=[]))

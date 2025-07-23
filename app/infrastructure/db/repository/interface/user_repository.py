@@ -12,7 +12,7 @@ class UserRepository(ABC):
 
 
     @abstractmethod
-    async def get_all_users(self) -> List[UserResponse]:
+    async def get_all_users(self, **filters) -> List[UserResponse]:
         raise NotImplementedError
 
 

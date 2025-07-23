@@ -7,10 +7,10 @@ from pydantic import SecretStr
 
 from app.interface.http.model.request.llm_request_dto import QuestionDTO
 from app.interface.http.model.response.llm_response_dto import AnswerDTO
-from app.service.interface.llm_service import LLMService
+from app.service.interface.base_llm_service import BaseLLMService
 
 
-class CustomLLMService(LLMService):
+class LlamaLLMService(BaseLLMService):
     _MESSAGES = [("system", "You are friendly agent"),
                  MessagesPlaceholder("history"),
                  ("user", "{question}")]

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class UserRequest:
+class UserRequestORM:
     login: str
     name: str
     hashed_password: str

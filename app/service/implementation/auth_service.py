@@ -3,8 +3,8 @@ from typing import Optional
 import bcrypt
 from passlib.context import CryptContext
 
-from app.infrastructure.db.model.request.user_request import UserRequest
-from app.infrastructure.db.model.response.user_response import UserResponse
+from app.infrastructure.db.model.request.user_request import UserRequestORM
+from app.infrastructure.db.model.response.user_response import UserResponseORM
 from app.infrastructure.db.repository.interface.user_repository import UserRepository
 from app.service.interface.base_auth_service import BaseAuthService
 
@@ -14,7 +14,7 @@ class AuthService(BaseAuthService):
         self.user_repository = user_repository
 
 
-    async def login(self, login: str, password: str) -> Optional[UserResponse]:
+    async def login(self, login: str, password: str) -> Optional[UserResponseORM]:
         users = await self.user_repository.get_all_users(login=login)
         for user in users:
             if self._verify_password(password=password, hashed_password=user.hashed_password):
@@ -22,15 +22,15 @@ class AuthService(BaseAuthService):
         return None
 
 
-    async def register(self, login: str, name: str, password: str) -> UserResponse:
+    async def register(self, login: str, name: str, password: str) -> UserResponseORM:
         hashed_password = self._hash_password(password=password)
-        user_response = await self.user_repository.save_user(UserRequest(login=login,
-                                                   name=name,
-                                                   hashed_password=hashed_password))
+        user_response = await self.user_repository.save_user(UserRequestORM(login=login,
+                                                                            name=name,
+                                                                            hashed_password=hashed_password))
         return user_response
 
 
-    async def get_user_by_id(self, user_id: str) -> Optional[UserResponse]:
+    async def get_user_by_id(self, user_id: str) -> Optional[UserResponseORM]:
         user = await self.user_repository.get_user_by_id(user_id=user_id)
         return user
 

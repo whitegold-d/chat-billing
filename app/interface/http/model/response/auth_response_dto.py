@@ -12,20 +12,20 @@ class LoginResponseDTO(BaseModel):
     metadata: UserMetadataSchema
 
     @classmethod
-    def from_dto(cls, user_response_orm: UserResponseORM) -> "LoginResponseDTO":
+    def from_orm(cls, user_response_orm: UserResponseORM) -> "LoginResponseDTO":
         return cls(
             login=user_response_orm.login,
             display_name=user_response_orm.name,
             metadata=UserMetadataSchema()
         )
 
-class UserResponseSchema(BaseModel):
+class UserResponseSchemaDTO(BaseModel):
     id: str
     display_name: str
     metadata: UserMetadataSchema
 
     @classmethod
-    def from_dto(cls, user_response_orm: UserResponseORM) -> "UserResponseSchema":
+    def from_orm(cls, user_response_orm: UserResponseORM) -> "UserResponseSchemaDTO":
         return cls(
             id=str(user_response_orm.id),
             display_name=user_response_orm.name,

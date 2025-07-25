@@ -4,7 +4,7 @@ from app.infrastructure.db.model.request.user_request import UserRequestORM
 from app.infrastructure.db.model.response.user_response import UserResponseORM
 from app.infrastructure.db.repository.interface.user_repository import UserRepository
 
-from uuid import UUID
+from uuid import UUID, uuid4
 
 
 class InMemoryUserRepository(UserRepository):
@@ -32,7 +32,7 @@ class InMemoryUserRepository(UserRepository):
 
     async def save_user(self, new_user: UserRequestORM) -> UserResponseORM:
         user = UserResponseORM(
-            id = UUID(),
+            id = uuid4(),
             name=new_user.name,
             login=new_user.login,
             hashed_password=new_user.hashed_password)

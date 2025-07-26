@@ -2,17 +2,23 @@ from typing import List, Optional
 
 from app.infrastructure.db.model.request.user_request import UserRequestORM
 from app.infrastructure.db.model.response.user_response import UserResponseORM
-from app.infrastructure.db.repository.interface.user_repository import UserRepository
 
 from uuid import UUID, uuid4
+from app.infrastructure.db.repository.interface.base_user_repository import BaseUserRepository
 
 
-class InMemoryUserRepository(UserRepository):
-    users = []
+class InMemoryUserRepository(BaseUserRepository):
+    users: List[UserResponseORM] = []
+    _self = None
+
+    def __new__(cls):
+        if cls._self is None:
+            cls._self = super().__new__(cls)
+        return cls._self
 
     async def get_user_by_id(self, user_id: str) -> Optional[UserResponseORM]:
         for user in self.users:
-            if user.id == user_id:
+            if str(user.id) == user_id:
                 return user
         return None
 

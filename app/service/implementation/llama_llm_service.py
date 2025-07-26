@@ -5,7 +5,7 @@ from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
-from app.interface.http.model.request.llm_request_dto import QuestionDTO
+from app.interface.http.model.request.llm_request_dto import HistoryType
 from app.interface.http.model.response.llm_response_dto import AnswerDTO
 from app.service.interface.base_llm_service import BaseLLMService
 
@@ -22,10 +22,10 @@ class LlamaLLMService(BaseLLMService):
         prompt = ChatPromptTemplate.from_messages(self._MESSAGES)
         self.chain = prompt | llm
 
-    async def execute(self, data: QuestionDTO) -> AnswerDTO:
+    async def execute(self, text: str, history: HistoryType) -> AnswerDTO:
         answer = await self.chain.ainvoke(
-            {"question": data.text,
-             "history": [(message.role, message.message) for message in data.history]})
+            {"question": text,
+             "history": [(message[0], message[1]) for message in history]})
         answer = cast(AIMessage, answer)
         result = AnswerDTO(
             text=answer.content,

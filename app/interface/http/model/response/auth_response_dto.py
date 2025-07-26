@@ -28,6 +28,6 @@ class UserResponseSchemaDTO(BaseModel):
     def from_orm(cls, user_response_orm: UserResponseORM) -> "UserResponseSchemaDTO":
         return cls(
             id=str(user_response_orm.id),
-            display_name=user_response_orm.name,
+            display_name=user_response_orm.login,
             metadata=UserMetadataSchema()
         )

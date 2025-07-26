@@ -1,14 +1,14 @@
 from dataclasses import dataclass
-from typing import Literal, List
+from typing import Literal, List, Tuple
 
+from pydantic import BaseModel
 
-@dataclass
-class MessageDTO:
-    role: Literal["user", "system"]
-    message: str
+HistoryType = List[Tuple[Literal["assistant", "human"], str]]
 
-
-@dataclass
-class QuestionDTO:
+class NewMessageRequest(BaseModel):
     text: str
-    history: List[MessageDTO]
+
+
+class TopUpRequest(BaseModel):
+    value: int
+

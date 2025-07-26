@@ -6,11 +6,10 @@ from app.dependency.auth_dependency import AuthServiceDependency, CurrentUserDep
 from app.interface.http.model.request.auth_request_dto import RegisterRequestDTO, LoginRequestDTO
 from app.interface.http.model.response.auth_response_dto import LoginResponseDTO, UserResponseSchemaDTO
 from app.interface.http.model.response.message_response_dto import SuccessMessage, ErrorMessage
-from app.service.implementation.auth_service import AuthService
 
-router = APIRouter(prefix='/auth', tags=["authorization"])
+auth_router = APIRouter(prefix='/auth', tags=["authorization"])
 
-@router.post('/register', response_model=SuccessMessage)
+@auth_router.post('/register', response_model=SuccessMessage)
 async def register(service: AuthServiceDependency,
                    data: RegisterRequestDTO = Body()) -> JSONResponse:
     user_response = await service.register(
@@ -22,7 +21,7 @@ async def register(service: AuthServiceDependency,
         status_code=status.HTTP_201_CREATED)
 
 
-@router.post('/login', response_model=LoginResponseDTO)
+@auth_router.post('/login', response_model=LoginResponseDTO)
 async def login(service: AuthServiceDependency,
                    data: LoginRequestDTO = Body()) -> JSONResponse:
     user_response = await service.login(
@@ -38,7 +37,7 @@ async def login(service: AuthServiceDependency,
         status_code=status.HTTP_200_OK)
 
 
-@router.get('/get_user', response_model=UserResponseSchemaDTO)
+@auth_router.get('/get_user', response_model=UserResponseSchemaDTO)
 async def get_cur_user(user: CurrentUserDependency) -> JSONResponse:
     if not user:
         return JSONResponse(
@@ -46,5 +45,5 @@ async def get_cur_user(user: CurrentUserDependency) -> JSONResponse:
             status_code=status.HTTP_401_UNAUTHORIZED)
 
     return JSONResponse(
-        content=UserResponseSchemaDTO.from_orm(user).model_dump(),
+        content=user.model_dump(),
         status_code=status.HTTP_200_OK)

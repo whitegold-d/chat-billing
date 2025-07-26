@@ -5,13 +5,18 @@ from passlib.context import CryptContext
 
 from app.infrastructure.db.model.request.user_request import UserRequestORM
 from app.infrastructure.db.model.response.user_response import UserResponseORM
-from app.infrastructure.db.repository.interface.user_repository import UserRepository
+from app.infrastructure.db.repository.interface.base_user_repository import BaseUserRepository
 from app.service.interface.base_auth_service import BaseAuthService
 
 
 class AuthService(BaseAuthService):
-    def __init__(self, user_repository: UserRepository):
-        self.user_repository = user_repository
+    _self = None
+
+    def __new__(cls, user_repository: BaseUserRepository):
+        if cls._self is None:
+            cls._self = super().__new__(cls)
+            cls._self.user_repository = user_repository
+        return cls._self
 
 
     async def login(self, login: str, password: str) -> Optional[UserResponseORM]:

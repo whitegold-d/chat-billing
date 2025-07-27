@@ -6,13 +6,13 @@ from app.infrastructure.db.model.response.user_response import UserResponseORM
 
 class BaseAuthService(ABC):
     @abstractmethod
-    def login(self, login: str, password: str) -> Optional[UserResponseORM]:
+    async def login(self, login: str, password: str) -> Optional[UserResponseORM]:
         raise NotImplementedError()
 
     @abstractmethod
-    def register(self, login: str, name: str, password: str) -> UserResponseORM:
+    async def register(self, login: str, name: str, password: str) -> UserResponseORM:
         raise NotImplementedError()
 
     @abstractmethod
-    def get_user_by_id(self, user_id: str) -> Optional[UserResponseORM]:
+    async def get_user_by_id(self, user_id: str) -> Optional[UserResponseORM]:
         raise NotImplementedError()

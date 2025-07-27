@@ -7,7 +7,11 @@ from app.infrastructure.db.repository.implementation.in_memory_transaction_repos
     InMemoryTransactionRepository
 from app.infrastructure.db.repository.interface.base_message_repository import BaseMessageRepository
 from app.infrastructure.db.repository.interface.base_transaction_repository import BaseTransactionRepository
+from app.service.implementation.chat_session_manager import ChatSessionManager
 from app.service.implementation.llama_llm_service import LlamaLLMService
+from app.service.implementation.message_service import MessageService
+from app.service.implementation.transaction_service import TransactionService
+from app.service.interface.base_chat_session_manager import BaseChatSessionManager
 from app.service.interface.base_llm_service import BaseLLMService
 from app.service.interface.base_message_service import BaseMessageService
 from app.service.interface.base_transaction_service import BaseTransactionService
@@ -16,14 +20,14 @@ from app.service.interface.base_transaction_service import BaseTransactionServic
 def get_transaction_repo() -> BaseTransactionRepository:
     return InMemoryTransactionRepository()
 
-def get_transaction_service(service: BaseTransactionService = Depends(get_transaction_repo)) -> BaseTransactionService:
-    return service
+def get_transaction_service(repo: BaseTransactionRepository = Depends(get_transaction_repo)) -> BaseTransactionService:
+    return TransactionService(repo)
 
 def get_message_repo() -> BaseMessageRepository:
     return InMemoryMessageRepository()
 
-def get_message_service(service: BaseMessageService = Depends(get_message_repo)) -> BaseMessageService:
-    return service
+def get_message_service(repo: BaseMessageRepository = Depends(get_message_repo)) -> BaseMessageService:
+    return MessageService(repo)
 
 def get_llm_service() -> BaseLLMService:
     llm_service = LlamaLLMService(
@@ -32,6 +36,13 @@ def get_llm_service() -> BaseLLMService:
     )
     return llm_service
 
-TransactionServiceDependency = Annotated[BaseTransactionService, get_transaction_service()]
-MessageServiceDependency = Annotated[BaseMessageService, get_message_service()]
-LLMServiceDependency = Annotated[BaseLLMService, get_llm_service()]
+def get_chat_session_manager(message_service = Depends(get_message_service),
+                tr_service = Depends(get_transaction_service),
+                llm_service = Depends(get_llm_service)) -> BaseChatSessionManager:
+    return ChatSessionManager(message_service, tr_service, llm_service)
+
+
+TransactionServiceDependency = Annotated[BaseTransactionService, Depends(get_transaction_service)]
+MessageServiceDependency = Annotated[BaseMessageService, Depends(get_message_service)]
+LLMServiceDependency = Annotated[BaseLLMService, Depends(get_llm_service)]
+ManagerServiceDependency = Annotated[BaseChatSessionManager, Depends()]

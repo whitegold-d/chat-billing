@@ -5,6 +5,7 @@ from fastapi import Depends
 from app.infrastructure.db.repository.implementation.in_memory_message_repository import InMemoryMessageRepository
 from app.infrastructure.db.repository.implementation.in_memory_transaction_repository import \
     InMemoryTransactionRepository
+from app.infrastructure.db.repository.implementation.sqlite_transaction_repository import SQLiteTransactionRepository
 from app.infrastructure.db.repository.interface.base_message_repository import BaseMessageRepository
 from app.infrastructure.db.repository.interface.base_transaction_repository import BaseTransactionRepository
 from app.service.implementation.chat_session_manager import ChatSessionManager
@@ -18,7 +19,7 @@ from app.service.interface.base_transaction_service import BaseTransactionServic
 
 
 def get_transaction_repo() -> BaseTransactionRepository:
-    return InMemoryTransactionRepository()
+    return SQLiteTransactionRepository()
 
 def get_transaction_service(repo: BaseTransactionRepository = Depends(get_transaction_repo)) -> BaseTransactionService:
     return TransactionService(repo)

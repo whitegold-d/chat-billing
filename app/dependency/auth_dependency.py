@@ -3,6 +3,7 @@ from typing import Annotated, Optional
 from fastapi import Depends, Header
 
 from app.infrastructure.db.repository.implementation.in_memory_user_repository import InMemoryUserRepository
+from app.infrastructure.db.repository.implementation.sqlite_user_repository import SQLiteUserRepository
 from app.infrastructure.db.repository.interface.base_user_repository import BaseUserRepository
 from app.interface.http.model.response.auth_response_dto import UserResponseSchemaDTO
 from app.service.implementation.auth_service import AuthService
@@ -10,7 +11,7 @@ from app.service.interface.base_auth_service import BaseAuthService
 
 
 def get_repo():
-    return InMemoryUserRepository()
+    return SQLiteUserRepository()
 
 def get_auth_service(auth_repo: BaseUserRepository = Depends(get_repo)):
     return AuthService(auth_repo)

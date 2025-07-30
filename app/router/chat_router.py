@@ -28,11 +28,29 @@ async def top_up_user_balance(user_id: str,
         transaction_type="top_up",
         value=tokens.value)
 
+    if not transaction_response:
+        return JSONResponse(content=ErrorMessage(message="Transaction failed").model_dump(),
+                            status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
+
     total_count = await tr_service.get_current_balance(user_id)
 
     return JSONResponse(content=SuccessMessage(
         message=f"Successfully added {transaction_response.value} tokens. Total count: {total_count}").model_dump(),
         status_code=HTTPStatus.OK)
+
+
+@chat_router.get('/users/{user_id}/balance', response_model=SuccessMessage)
+async def get_balance(user_id: str,
+                      transaction_service: TransactionServiceDependency,
+                      auth_service: AuthServiceDependency):
+    user = await auth_service.get_user_by_id(user_id)
+    if user is None:
+        return JSONResponse(content=ErrorMessage(message="User not found").model_dump(),
+                            status_code=HTTPStatus.NOT_FOUND)
+
+    balance = await transaction_service.get_current_balance(user_id)
+    return JSONResponse(content=SuccessMessage(message=f"Current balance: {balance}").model_dump(),
+                        status_code=HTTPStatus.OK)
 
 
 @chat_router.post("/users/{user_id}/chat/{chat_id}", response_model=NewMessageResponseDTO)

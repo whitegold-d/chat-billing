@@ -2,6 +2,8 @@ import datetime
 from typing import List
 from uuid import uuid4
 
+from fastapi import HTTPException
+
 from app.infrastructure.db.model.request.transaction_request import TransactionRequestORM
 from app.infrastructure.db.model.response.transaction_response import TransactionResponseORM
 from app.infrastructure.db.repository.interface.base_transaction_repository import BaseTransactionRepository
@@ -41,17 +43,25 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
         return result
 
 
-    async def create_transaction(self, data: TransactionRequestORM) -> TransactionResponseORM:
-        with sqlite3.connect(DB_PATH) as conn:
-            cursor = conn.cursor()
-            transaction_id = uuid4()
-            date = datetime.datetime.now()
-            cursor.execute("""INSERT INTO transaction_model (id, user_id, transaction_type, value, created_at) VALUES (?, ?, ?, ?, ?)""",
-                           (str(transaction_id),
-                            data.user_id,
-                            data.transaction_type,
-                            data.value,
-                            str(date)
-                            ))
-            conn.commit()
-        return TransactionResponseORM(transaction_id, data.user_id, data.transaction_type, data.value, date)
+    async def create_transaction(self, data: TransactionRequestORM) -> TransactionResponseORM | None:
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                cursor = conn.cursor()
+                transaction_id = uuid4()
+                date = datetime.datetime.now()
+                cursor.execute(
+                    """INSERT INTO transaction_model (id, user_id, transaction_type, value, created_at) VALUES (?, ?, ?, ?, ?)""",
+                    (str(transaction_id),
+                     data.user_id,
+                     data.transaction_type,
+                     data.value,
+                     str(date)
+                     ))
+                conn.commit()
+            return TransactionResponseORM(transaction_id, data.user_id, data.transaction_type, data.value, date)
+        except sqlite3.Error as error:
+            if conn:
+                conn.rollback()
+            return None
+        finally:
+            conn.close()

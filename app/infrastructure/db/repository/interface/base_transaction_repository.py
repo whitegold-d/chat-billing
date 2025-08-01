@@ -3,9 +3,10 @@ from typing import List
 
 from app.infrastructure.db.model.request.transaction_request import TransactionRequestORM
 from app.infrastructure.db.model.response.transaction_response import TransactionResponseORM
+from app.infrastructure.db.repository.base_repository import BaseRepository
 
 
-class BaseTransactionRepository(ABC):
+class BaseTransactionRepository(ABC, BaseRepository):
     @abstractmethod
     async def get_all_transactions(self, **filters) -> List[TransactionResponseORM]:
         raise NotImplementedError

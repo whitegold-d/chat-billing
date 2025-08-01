@@ -5,6 +5,13 @@ from app.utils.constants import DB_PATH
 
 
 class SQLiteDatabase(BaseDatabase):
+    _self = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._self is None:
+            return super().__new__(cls)
+        return cls._self
+
     def init_db(self) -> None:
         with sqlite3.connect(DB_PATH) as db:
             cursor = db.cursor()
@@ -23,4 +30,4 @@ class SQLiteDatabase(BaseDatabase):
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY(user_id) REFERENCES user(id))""", ())
             db.commit()
-            print("DB Successfully Initialized")
+            print("SqliteDB Successfully Initialized")

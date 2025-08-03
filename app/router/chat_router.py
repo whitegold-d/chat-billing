@@ -7,7 +7,7 @@ from app.dependency.auth_dependency import AuthServiceDependency
 from app.dependency.llm_dependency import TransactionServiceDependency, LLMServiceDependency, MessageServiceDependency, \
     ManagerServiceDependency
 from app.infrastructure.db.repository.implementation.in_memory_message_repository import InMemoryMessageRepository
-from app.interface.http.model.request.llm_request_dto import TopUpRequest, NewMessageRequest
+from app.interface.http.model.request.llm_request_dto import TopUpRequestDTO, NewMessageRequestDTO
 from app.interface.http.model.response.llm_response_dto import NewMessageResponseDTO
 from app.interface.http.model.response.message_response_dto import SuccessMessage, ErrorMessage
 
@@ -17,7 +17,7 @@ chat_router = APIRouter(prefix="/chat", tags=["chat"])
 async def top_up_user_balance(user_id: str,
                               auth_service: AuthServiceDependency,
                               tr_service: TransactionServiceDependency,
-                              tokens: TopUpRequest = Body()) -> JSONResponse:
+                              tokens: TopUpRequestDTO = Body()) -> JSONResponse:
     user = await auth_service.get_user_by_id(user_id)
     if user is None:
         return JSONResponse(content=ErrorMessage(message="User not found").model_dump(),
@@ -59,7 +59,7 @@ async def send_message(user_id: str,
                        auth_service: AuthServiceDependency,
                        tr_service: TransactionServiceDependency,
                        manager_service: ManagerServiceDependency,
-                       new_message: NewMessageRequest = Body()
+                       new_message: NewMessageRequestDTO = Body()
                      ) -> JSONResponse:
     user = await auth_service.get_user_by_id(user_id)
     if user is None:

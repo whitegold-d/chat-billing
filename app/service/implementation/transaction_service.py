@@ -1,5 +1,6 @@
 from typing import Literal
 
+from app.infrastructure.db.model.request.move_transaction_request import MoveTransactionRequest
 from app.infrastructure.db.model.request.transaction_request import TransactionRequestORM
 from app.infrastructure.db.repository.interface.base_transaction_repository import BaseTransactionRepository
 from app.service.interface.base_transaction_service import BaseTransactionService
@@ -30,4 +31,12 @@ class TransactionService(BaseTransactionService):
     async def get_current_balance(self, user_id: str):
         transactions = await self.transaction_repository.get_all_transactions(user_id=user_id)
         result_value = sum(tr.value for tr in transactions)
+        return result_value
+
+
+    async def move_token(self, token_giving_user_id: str, token_taking_user_id: str, value: int) -> bool:
+        result_value = await self.transaction_repository.move_tokens_transaction(
+            MoveTransactionRequest(token_giving_user_id,
+                                   token_taking_user_id,
+                                   value))
         return result_value

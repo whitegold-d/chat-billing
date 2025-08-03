@@ -5,10 +5,18 @@ from pydantic import BaseModel
 
 HistoryType = List[Tuple[Literal["assistant", "human"], str]]
 
-class NewMessageRequest(BaseModel):
+class NewMessageRequestDTO(BaseModel):
     text: str
 
 
-class TopUpRequest(BaseModel):
+class TopUpRequestDTO(BaseModel):
     value: int
+
+
+class MoveTransactionRequestDTO(BaseModel):
+    tokens_giving_user_id: str
+    tokens_taking_user_id: str
+    value: int
+
+
 

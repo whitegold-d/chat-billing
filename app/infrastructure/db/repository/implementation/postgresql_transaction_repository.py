@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
 
+from app.infrastructure.db.model.request.move_transaction_request import MoveTransactionRequest
 from app.infrastructure.db.model.request.transaction_request import TransactionRequestORM
 from app.infrastructure.db.model.request.user_request import UserRequestORM
 from app.infrastructure.db.model.response.transaction_response import TransactionResponseORM
@@ -43,4 +44,21 @@ class PostgreSQLTransactionRepository(BaseTransactionRepository):
             await connection.execute("""INSERT INTO transaction_model (id, user_id, transaction_type, value, created_at) VALUES ($1, $2, $3, $4, $5)""",
                                transaction_id, data.user_id, data.transaction_type, data.value, date_now)
         return TransactionResponseORM(transaction_id, data.user_id, data.transaction_type, data.value, date_now)
+
+
+    async def move_tokens_transaction(self, data: MoveTransactionRequest) -> int:
+        try:
+            async with self._get_db_connection() as connection:
+                id_1 = str(uuid4())
+                id_2 = str(uuid4())
+                async with connection.transaction():
+                    connection.execute("""
+                        INSERT INTO transaction_model (id, user_id, transaction_type, value, created_at) 
+                        VALUES ($1, $2, $3, $4, $5)""", id_1, data.token_giving_user_id, "u2u", -data.value, datetime.now())
+                    connection.execute("""
+                        INSERT INTO transaction_model (id, user_id, transaction_type, value, created_at) 
+                        VALUES ($1, $2, $3, $4, $5)""", id_1, data.token_taking_user_id, "u2u", data.value, datetime.now())
+        except Exception as e:
+            return False
+        return True
 

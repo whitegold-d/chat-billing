@@ -8,6 +8,6 @@ from uuid import UUID
 class TransactionResponseORM:
     id: UUID
     user_id: str
-    transaction_type: Literal["chat", "top_up"]
+    transaction_type: Literal["chat", "top_up", "u2u"]
     value: int
     created_at: datetime

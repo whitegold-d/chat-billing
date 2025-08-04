@@ -3,10 +3,9 @@ from typing import List, Optional
 
 from app.infrastructure.db.model.request.user_request import UserRequestORM
 from app.infrastructure.db.model.response.user_response import UserResponseORM
-from app.infrastructure.db.repository.base_repository import BaseRepository
 
 
-class BaseUserRepository(ABC, BaseRepository):
+class BaseUserRepository(ABC):
     @abstractmethod
     async def get_user_by_id(self, user_id: str) -> Optional[UserResponseORM]:
         raise NotImplementedError

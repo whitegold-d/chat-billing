@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from fastapi import HTTPException
 
+from app.infrastructure.db.model.request.move_transaction_request import MoveTransactionRequest
 from app.infrastructure.db.model.request.transaction_request import TransactionRequestORM
 from app.infrastructure.db.model.response.transaction_response import TransactionResponseORM
 from app.infrastructure.db.repository.interface.base_transaction_repository import BaseTransactionRepository
@@ -65,3 +66,7 @@ class SQLiteTransactionRepository(BaseTransactionRepository):
             return None
         finally:
             conn.close()
+
+
+    async def move_tokens_transaction(self, data: MoveTransactionRequest) -> bool:
+        pass

@@ -14,15 +14,16 @@ from app.router.chat_router import chat_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    current_db.init_db()
+    await current_db.init_db()
     yield
+    await current_db.close_db()
 
 
 app = FastAPI(title="billing-app", description="", version="1.0", lifespan=lifespan)
 app.include_router(router=auth_router, prefix="/api/v1")
 app.include_router(router=chat_router, prefix="/api/v1")
 
-@app.exception_handler(Error)
-async def exception_handler(request: Request, ex: Error) -> JSONResponse:
+@app.exception_handler(500)
+async def exception_handler(request: Request, ex: Exception) -> JSONResponse:
     return JSONResponse(content=ErrorMessage(message=f"An error occurred: {ex}"),
                         status_code=HTTPStatus.INTERNAL_SERVER_ERROR)

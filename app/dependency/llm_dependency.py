@@ -5,6 +5,9 @@ from fastapi import Depends
 from app.infrastructure.db.repository.implementation.in_memory_message_repository import InMemoryMessageRepository
 from app.infrastructure.db.repository.implementation.in_memory_transaction_repository import \
     InMemoryTransactionRepository
+from app.infrastructure.db.repository.implementation.postgresql_message_repository import PostgreSQLMessageRepository
+from app.infrastructure.db.repository.implementation.postgresql_transaction_repository import \
+    PostgreSQLTransactionRepository
 from app.infrastructure.db.repository.implementation.sqlite_transaction_repository import SQLiteTransactionRepository
 from app.infrastructure.db.repository.interface.base_message_repository import BaseMessageRepository
 from app.infrastructure.db.repository.interface.base_transaction_repository import BaseTransactionRepository
@@ -19,13 +22,13 @@ from app.service.interface.base_transaction_service import BaseTransactionServic
 
 
 def get_transaction_repo() -> BaseTransactionRepository:
-    return SQLiteTransactionRepository()
+    return PostgreSQLTransactionRepository()
 
 def get_transaction_service(repo: BaseTransactionRepository = Depends(get_transaction_repo)) -> BaseTransactionService:
     return TransactionService(repo)
 
 def get_message_repo() -> BaseMessageRepository:
-    return InMemoryMessageRepository()
+    return PostgreSQLMessageRepository()
 
 def get_message_service(repo: BaseMessageRepository = Depends(get_message_repo)) -> BaseMessageService:
     return MessageService(repo)

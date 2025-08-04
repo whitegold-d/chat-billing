@@ -6,7 +6,6 @@ from app.utils.constants import PG_DATABASE_DSN
 
 
 class PostgreSQLMessageRepository(BaseMessageRepository):
-    dsn = PG_DATABASE_DSN
     _self = None
 
     def __new__(cls, *args, **kwargs):

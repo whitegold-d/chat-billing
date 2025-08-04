@@ -6,8 +6,8 @@ from starlette.responses import JSONResponse
 from app.dependency.auth_dependency import AuthServiceDependency
 from app.dependency.llm_dependency import TransactionServiceDependency, LLMServiceDependency, MessageServiceDependency, \
     ManagerServiceDependency
-from app.infrastructure.db.repository.implementation.in_memory_message_repository import InMemoryMessageRepository
-from app.interface.http.model.request.llm_request_dto import TopUpRequestDTO, NewMessageRequestDTO
+from app.interface.http.model.request.llm_request_dto import TopUpRequestDTO, NewMessageRequestDTO, \
+    MoveTransactionRequestDTO
 from app.interface.http.model.response.llm_response_dto import NewMessageResponseDTO
 from app.interface.http.model.response.message_response_dto import SuccessMessage, ErrorMessage
 
@@ -71,3 +71,19 @@ async def send_message(user_id: str,
                             status_code=HTTPStatus.NOT_FOUND)
     answer = await manager_service.send_message(chat_id, user_id, new_message.text)
     return JSONResponse(content=NewMessageResponseDTO.from_answer(answer).model_dump())
+
+
+@chat_router.post("/users/donate", response_model=SuccessMessage)
+async def donate(auth_service: AuthServiceDependency,
+                 tr_service: TransactionServiceDependency,
+                 request: MoveTransactionRequestDTO = Body()) -> JSONResponse:
+    user_giving = await auth_service.get_user_by_id(request.tokens_giving_user_id)
+    user_taking = await auth_service.get_user_by_id(request.tokens_taking_user_id)
+    if user_giving is None or user_taking is None:
+        return JSONResponse(content=ErrorMessage(message="Donating or receiving user not found").model_dump(),
+                            status_code=HTTPStatus.NOT_FOUND)
+    if not await tr_service.move_tokens(user_giving.id, user_taking.id, request.value):
+        return JSONResponse(content=ErrorMessage(message="Something went wrong").model_dump(),
+                            status_code=HTTPStatus.NOT_FOUND)
+    return JSONResponse(content=SuccessMessage(message="Tokens were transferred successfully").model_dump(),
+                            status_code=HTTPStatus.OK)

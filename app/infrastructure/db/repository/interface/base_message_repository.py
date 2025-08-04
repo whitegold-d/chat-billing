@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
 
 from app.infrastructure.db.model.request.message_request import MessageRequestORM
-from app.infrastructure.db.repository.base_repository import BaseRepository
 
 
-class BaseMessageRepository(ABC, BaseRepository):
+class BaseMessageRepository(ABC):
     @abstractmethod
     async def get_all_messages(self, **filters):
         raise NotImplementedError

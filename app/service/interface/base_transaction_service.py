@@ -14,3 +14,8 @@ class BaseTransactionService(ABC):
     @abstractmethod
     async def get_current_balance(self, user_id: str) -> int:
         raise NotImplementedError()
+
+
+    @abstractmethod
+    async def move_tokens(self, token_giving_user_id: str, token_taking_user_id: str, value: int) -> bool:
+        raise NotImplementedError()

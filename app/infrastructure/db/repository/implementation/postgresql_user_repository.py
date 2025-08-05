@@ -47,5 +47,5 @@ class PostgreSQLUserRepository(BaseUserRepository):
             user_id = uuid4()
             await connection.execute(
                 "INSERT INTO users (id, login, name, hashed_password) VALUES ($1, $2, $3, $4)",
-                str(user_id), user.login, user.name, user.hashed_password)
+                user_id, user.login, user.name, user.hashed_password)
         return UserResponseORM(user_id, user.login, user.name, user.hashed_password)

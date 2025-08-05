@@ -19,18 +19,40 @@ class PostgreSQLDatabase(BaseDatabase):
         async with PostgreSQLConnectionManager.get_connection() as conn:
             await conn.execute(
                 """
+                CREATE EXTENSION IF NOT EXIST vector;
+                """
+            )
+            await conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS documents (
+                    id UUID PRIMARY KEY,
+                    text TEXT NOT NULL,
+                    embedding vector(768)
+                );
+                CREATE INDEX ON documents USING hnsw (embedding vector_cosine_ops);
+                """
+            )
+            await conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS users (
-                    id TEXT PRIMARY KEY,
+                    id UUID PRIMARY KEY,
                     login TEXT NOT NULL,
                     name TEXT UNIQUE NOT NULL,
                     hashed_password TEXT NOT NULL)"""
             )
             await conn.execute(
                 """
-                CREATE TABLE IF NOT EXISTS transaction_model (
-                    id TEXT PRIMARY KEY,
+                CREATE TYPE transaction_type as ENUM (
+                    'u2u', 'top_up', 'chat'
+                );
+                """
+            )
+            await conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS transactions (
+                    id UUID PRIMARY KEY,
                     user_id TEXT NOT NULL,
-                    transaction_type TEXT NOT NULL,
+                    transaction_type transaction_type NOT NULL,
                     value INTEGER NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY(user_id) REFERENCES users(id))"""

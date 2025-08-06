@@ -12,4 +12,4 @@ class DBService(BaseDBService):
         return cls._self
 
     async def init_db(self) -> None:
-        self.db.init_db()
+        await self.db.initialize_db()

@@ -2,7 +2,6 @@ import asyncpg
 
 from app.infrastructure.db.model.request.message_request import MessageRequestORM
 from app.infrastructure.db.repository.interface.base_message_repository import BaseMessageRepository
-from app.utils.constants import PG_DATABASE_DSN
 
 
 class PostgreSQLMessageRepository(BaseMessageRepository):

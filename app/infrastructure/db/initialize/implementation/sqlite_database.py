@@ -12,7 +12,7 @@ class SQLiteDatabase(BaseDatabase):
             return super().__new__(cls)
         return cls._self
 
-    def init_db(self) -> None:
+    def initialize_db(self) -> None:
         with sqlite3.connect(DB_PATH) as db:
             cursor = db.cursor()
             cursor.execute("""

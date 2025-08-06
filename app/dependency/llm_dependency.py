@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
+from app.infrastructure.db.initialize.rag.rag import RAG
 from app.infrastructure.db.repository.implementation.in_memory_message_repository import InMemoryMessageRepository
 from app.infrastructure.db.repository.implementation.in_memory_transaction_repository import \
     InMemoryTransactionRepository
@@ -40,13 +41,18 @@ def get_llm_service() -> BaseLLMService:
     )
     return llm_service
 
+def get_rag_model():
+    return RAG(db_type='pgvector')
+
 def get_chat_session_manager(message_service = Depends(get_message_service),
                 tr_service = Depends(get_transaction_service),
-                llm_service = Depends(get_llm_service)) -> BaseChatSessionManager:
-    return ChatSessionManager(message_service, tr_service, llm_service)
+                llm_service = Depends(get_llm_service),
+                rag_service = Depends(get_rag_model)) -> BaseChatSessionManager:
+    return ChatSessionManager(message_service, tr_service, llm_service, rag_service)
 
 
 TransactionServiceDependency = Annotated[BaseTransactionService, Depends(get_transaction_service)]
 MessageServiceDependency = Annotated[BaseMessageService, Depends(get_message_service)]
 LLMServiceDependency = Annotated[BaseLLMService, Depends(get_llm_service)]
-ManagerServiceDependency = Annotated[BaseChatSessionManager, Depends()]
+ManagerServiceDependency = Annotated[BaseChatSessionManager, Depends(get_chat_session_manager)]
+RagServiceDependency = Annotated[RAG, Depends(get_rag_model)]

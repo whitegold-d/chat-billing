@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 
 from app.dependency.auth_dependency import AuthServiceDependency
 from app.dependency.llm_dependency import TransactionServiceDependency, LLMServiceDependency, MessageServiceDependency, \
-    ManagerServiceDependency
+    ManagerServiceDependency, RagServiceDependency
 from app.interface.http.model.request.llm_request_dto import TopUpRequestDTO, NewMessageRequestDTO, \
     MoveTransactionRequestDTO
 from app.interface.http.model.response.llm_response_dto import NewMessageResponseDTO
@@ -87,3 +87,15 @@ async def donate(auth_service: AuthServiceDependency,
                             status_code=HTTPStatus.NOT_FOUND)
     return JSONResponse(content=SuccessMessage(message="Tokens were transferred successfully").model_dump(),
                             status_code=HTTPStatus.OK)
+
+
+@chat_router.post("/users/upload")
+async def upload_document(manager_service: ManagerServiceDependency,
+                          document_name: str):
+    await manager_service.upload_documents("./documents/" + document_name)
+
+
+@chat_router.post("/users/retrieve")
+async def retrieve_information(manager_service: ManagerServiceDependency):
+    await manager_service.retrieve_information(user_query="Что такое симметричное биномиальное распределение",
+                                               limit=5)

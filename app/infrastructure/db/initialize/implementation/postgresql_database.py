@@ -1,8 +1,8 @@
-import asyncpg
+from pgvector.asyncpg import register_vector
 
 from app.infrastructure.db.initialize.interface.base_database import BaseDatabase
 from app.infrastructure.db.postgresql_connection_manager import PostgreSQLConnectionManager
-from app.utils.constants import PG_DATABASE_DSN, DB_PATH
+
 
 class PostgreSQLDatabase(BaseDatabase):
     _self = None
@@ -13,15 +13,16 @@ class PostgreSQLDatabase(BaseDatabase):
         return cls._self
 
 
-    async def init_db(self) -> None:
+    async def initialize_db(self) -> None:
         await PostgreSQLConnectionManager.create_pool()
 
         async with PostgreSQLConnectionManager.get_connection() as conn:
             await conn.execute(
                 """
-                CREATE EXTENSION IF NOT EXIST vector;
+                CREATE EXTENSION IF NOT EXISTS vector;
                 """
             )
+            await register_vector(conn)
             await conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS documents (
@@ -38,7 +39,7 @@ class PostgreSQLDatabase(BaseDatabase):
                     id UUID PRIMARY KEY,
                     login TEXT NOT NULL,
                     name TEXT UNIQUE NOT NULL,
-                    hashed_password TEXT NOT NULL)"""
+                    hashed_password TEXT NOT NULL);"""
             )
             await conn.execute(
                 """
@@ -51,13 +52,12 @@ class PostgreSQLDatabase(BaseDatabase):
                 """
                 CREATE TABLE IF NOT EXISTS transactions (
                     id UUID PRIMARY KEY,
-                    user_id TEXT NOT NULL,
+                    user_id UUID NOT NULL,
                     transaction_type transaction_type NOT NULL,
                     value INTEGER NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY(user_id) REFERENCES users(id))"""
             )
-            print("PostgreSQL database initialized")
 
 
     async def close_db(self) -> None:

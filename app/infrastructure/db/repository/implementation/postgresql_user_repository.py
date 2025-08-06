@@ -5,11 +5,9 @@ from app.infrastructure.db.model.request.user_request import UserRequestORM
 from app.infrastructure.db.model.response.user_response import UserResponseORM
 from app.infrastructure.db.postgresql_connection_manager import PostgreSQLConnectionManager
 from app.infrastructure.db.repository.interface.base_user_repository import BaseUserRepository
-from app.utils.constants import PG_DATABASE_DSN
 
 
 class PostgreSQLUserRepository(BaseUserRepository):
-    dsn = PG_DATABASE_DSN
     _self = None
 
     def __new__(cls, *args, **kwargs):

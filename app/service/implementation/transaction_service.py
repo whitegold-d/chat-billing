@@ -1,4 +1,5 @@
 from typing import Literal, Optional
+from uuid import UUID
 
 from app.infrastructure.db.model.request.move_transaction_request import MoveTransactionRequest
 from app.infrastructure.db.model.request.transaction_request import TransactionRequestORM
@@ -17,7 +18,7 @@ class TransactionService(BaseTransactionService):
 
 
     async def create_transaction(self, user_id: str,
-                                 transaction_type: Literal["chat", "top_up"],
+                                 transaction_type: Literal["chat", "top_up", "u2u"],
                                  value: int):
         new_transaction = await self.transaction_repository.create_transaction(
             TransactionRequestORM(
@@ -29,7 +30,7 @@ class TransactionService(BaseTransactionService):
 
 
     async def get_current_balance(self, user_id: str) -> int:
-        transactions = await self.transaction_repository.get_all_transactions(user_id=user_id)
+        transactions = await self.transaction_repository.get_all_transactions(user_id=UUID(str(user_id)))
 
         if not transactions:
             return 0

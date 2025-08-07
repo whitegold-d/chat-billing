@@ -41,19 +41,19 @@ class PostgreSQLDatabase(BaseDatabase):
                     name TEXT UNIQUE NOT NULL,
                     hashed_password TEXT NOT NULL);"""
             )
-            await conn.execute(
-                """
-                CREATE TYPE transaction_type as ENUM (
-                    'u2u', 'top_up', 'chat'
-                );
-                """
-            )
+            # await conn.execute(
+            #     """
+            #     CREATE TYPE transaction_type as ENUM (
+            #         'u2u', 'top_up', 'chat'
+            #     );
+            #     """
+            # )
             await conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS transactions (
                     id UUID PRIMARY KEY,
                     user_id UUID NOT NULL,
-                    transaction_type transaction_type NOT NULL,
+                    transaction_type TEXT NOT NULL,
                     value INTEGER NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY(user_id) REFERENCES users(id))"""

@@ -8,12 +8,14 @@ from fastapi import FastAPI
 from starlette.responses import JSONResponse
 
 from app.dependency.db_dependency import current_db
+from app.infrastructure.db.initialize.rag.rag import RAG
 from app.interface.http.model.response.message_response_dto import ErrorMessage
 from app.router.auth_router import auth_router
 from app.router.chat_router import chat_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    RAG()
     await current_db.initialize_db()
     yield
     await current_db.close_db()

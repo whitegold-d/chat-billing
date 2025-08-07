@@ -1,15 +1,12 @@
 from datetime import datetime
-from typing import List, Optional
-from uuid import uuid4
+from typing import List
+from uuid import uuid4, UUID
 
 from app.infrastructure.db.model.request.move_transaction_request import MoveTransactionRequest
 from app.infrastructure.db.model.request.transaction_request import TransactionRequestORM
-from app.infrastructure.db.model.request.user_request import UserRequestORM
 from app.infrastructure.db.model.response.transaction_response import TransactionResponseORM, TransactionType
-from app.infrastructure.db.model.response.user_response import UserResponseORM
 from app.infrastructure.db.postgresql_connection_manager import PostgreSQLConnectionManager
 from app.infrastructure.db.repository.interface.base_transaction_repository import BaseTransactionRepository
-from app.infrastructure.db.repository.interface.base_user_repository import BaseUserRepository
 
 
 class PostgreSQLTransactionRepository(BaseTransactionRepository):
@@ -22,7 +19,7 @@ class PostgreSQLTransactionRepository(BaseTransactionRepository):
 
     async def get_all_transactions(self, **filters) -> List[TransactionResponseORM] | None:
         async with PostgreSQLConnectionManager.get_connection() as connection:
-            transactions = await connection.fetch("SELECT * from transaction_model")
+            transactions = await connection.fetch("SELECT * from transactions")
 
         if not transactions:
             return None
@@ -32,6 +29,7 @@ class PostgreSQLTransactionRepository(BaseTransactionRepository):
             for transaction in transactions:
                 if transaction.get(key) == value:
                     result.append(transaction)
+        print(result)
         return result
 
 
@@ -39,15 +37,15 @@ class PostgreSQLTransactionRepository(BaseTransactionRepository):
         async with PostgreSQLConnectionManager.get_connection() as connection:
             transaction_id = uuid4()
             date_now = datetime.now()
-            await connection.set_type_codec(
-                'transaction_type',
-                encoder=str,
-                decoder=lambda x: TransactionType(x),
-                schema='public',
-            )
-            await connection.execute("INSERT INTO transaction_model (id, user_id, transaction_type, value, created_at) VALUES ($1, $2, $3, $4, $5)",
+            # await connection.set_type_codec(
+            #     'transaction_type',
+            #     encoder=str,
+            #     decoder=lambda x: TransactionType(x),
+            #     schema='public',
+            # )
+            await connection.execute("INSERT INTO transactions (id, user_id, transaction_type, value, created_at) VALUES ($1, $2, $3, $4, $5)",
                                transaction_id, data.user_id, data.transaction_type, data.value, date_now)
-        return TransactionResponseORM(transaction_id, data.user_id, TransactionType(data.transaction_type), data.value, date_now)
+        return TransactionResponseORM(transaction_id, UUID(data.user_id), TransactionType(data.transaction_type), data.value, date_now)
 
 
     async def move_tokens_transaction(self, data: MoveTransactionRequest) -> bool:
@@ -57,10 +55,10 @@ class PostgreSQLTransactionRepository(BaseTransactionRepository):
                 id_2 = uuid4()
                 async with connection.transaction():
                     await connection.execute("""
-                        INSERT INTO transaction_model (id, user_id, transaction_type, value, created_at) 
+                        INSERT INTO transactions (id, user_id, transaction_type, value, created_at) 
                         VALUES ($1, $2, $3, $4, $5)""", id_1, data.token_giving_user_id, TransactionType.U2U, -data.value, datetime.now())
                     await connection.execute("""
-                        INSERT INTO transaction_model (id, user_id, transaction_type, value, created_at) 
+                        INSERT INTO transactions (id, user_id, transaction_type, value, created_at) 
                         VALUES ($1, $2, $3, $4, $5)""", id_2, data.token_taking_user_id, TransactionType.U2U, data.value, datetime.now())
         except Exception as e:
             return False

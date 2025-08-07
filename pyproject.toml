@@ -13,4 +13,6 @@ dependencies = [
     "langchain-openai>=0.3.28",
     "passlib>=1.7.4",
     "pgvector>=0.4.1",
+    "pypdf>=5.9.0",
+    "sentence-transformers>=5.1.0",
 ]

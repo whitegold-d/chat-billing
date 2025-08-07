@@ -14,7 +14,7 @@ class TransactionType(StrEnum):
 @dataclass
 class TransactionResponseORM:
     id: UUID
-    user_id: str
+    user_id: UUID
     transaction_type: TransactionType
     value: int
     created_at: datetime

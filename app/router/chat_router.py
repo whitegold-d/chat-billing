@@ -92,7 +92,7 @@ async def donate(auth_service: AuthServiceDependency,
 @chat_router.post("/users/upload")
 async def upload_document(manager_service: ManagerServiceDependency,
                           document_name: str):
-    await manager_service.upload_documents("./documents/" + document_name)
+    await manager_service.upload_documents("app/documents/" + document_name)
 
 
 @chat_router.post("/users/retrieve")

@@ -5,5 +5,5 @@ from typing import Literal
 @dataclass
 class TransactionRequestORM:
     user_id: str
-    transaction_type: Literal["chat", "top_up"]
+    transaction_type: Literal["chat", "top_up", "u2u"]
     value: int

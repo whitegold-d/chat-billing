@@ -2,6 +2,9 @@ from datetime import datetime
 from typing import List
 from uuid import uuid4, UUID
 
+from sqlalchemy import select
+
+from app.infrastructure.db.model.ORM.user_orm import UserORM
 from app.infrastructure.db.model.request.move_transaction_request import MoveTransactionRequest
 from app.infrastructure.db.model.request.transaction_request import TransactionRequestORM
 from app.infrastructure.db.model.response.transaction_response import TransactionResponseORM, TransactionType
@@ -18,8 +21,10 @@ class PostgreSQLTransactionRepository(BaseTransactionRepository):
         return cls._self
 
     async def get_all_transactions(self, **filters) -> List[TransactionResponseORM] | None:
-        async with PostgreSQLConnectionManager.get_connection() as connection:
-            transactions = await connection.fetch("SELECT * from transactions")
+        async with PostgreSQLConnectionManager.get_session() as session:
+            stmt = select(UserORM)
+            result = await session.execute(stmt)
+            transactions = result.all()
 
         if not transactions:
             return None

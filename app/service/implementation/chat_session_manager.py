@@ -1,4 +1,4 @@
-from app.infrastructure.db.initialize.rag.rag import RAG
+from app.rag.rag import RAG
 from app.service.interface.base_chat_session_manager import BaseChatSessionManager
 from app.service.interface.base_llm_service import BaseLLMService
 from app.service.interface.base_message_service import BaseMessageService

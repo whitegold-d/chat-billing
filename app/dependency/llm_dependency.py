@@ -2,14 +2,10 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.infrastructure.db.initialize.rag.rag import RAG
-from app.infrastructure.db.repository.implementation.in_memory_message_repository import InMemoryMessageRepository
-from app.infrastructure.db.repository.implementation.in_memory_transaction_repository import \
-    InMemoryTransactionRepository
+from app.rag.rag import RAG
 from app.infrastructure.db.repository.implementation.postgresql_message_repository import PostgreSQLMessageRepository
 from app.infrastructure.db.repository.implementation.postgresql_transaction_repository import \
     PostgreSQLTransactionRepository
-from app.infrastructure.db.repository.implementation.sqlite_transaction_repository import SQLiteTransactionRepository
 from app.infrastructure.db.repository.interface.base_message_repository import BaseMessageRepository
 from app.infrastructure.db.repository.interface.base_transaction_repository import BaseTransactionRepository
 from app.service.implementation.chat_session_manager import ChatSessionManager

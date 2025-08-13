@@ -2,8 +2,9 @@ from datetime import datetime
 from typing import List
 from uuid import uuid4, UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, insert
 
+from app.infrastructure.db.model.ORM.transaction_orm import TransactionORM
 from app.infrastructure.db.model.ORM.user_orm import UserORM
 from app.infrastructure.db.model.request.move_transaction_request import MoveTransactionRequest
 from app.infrastructure.db.model.request.transaction_request import TransactionRequestORM
@@ -20,52 +21,41 @@ class PostgreSQLTransactionRepository(BaseTransactionRepository):
             cls._self = super().__new__(cls)
         return cls._self
 
-    async def get_all_transactions(self, **filters) -> List[TransactionResponseORM] | None:
+    async def get_all_transactions(self) -> List[TransactionResponseORM] | None:
         async with PostgreSQLConnectionManager.get_session() as session:
-            stmt = select(UserORM)
+            stmt = select(TransactionORM)
             result = await session.execute(stmt)
             transactions = result.all()
-
-        if not transactions:
-            return None
-
-        result = []
-        for key, value in filters.items():
-            for transaction in transactions:
-                if transaction.get(key) == value:
-                    result.append(transaction)
-        print(result)
+        result = [TransactionResponseORM(*args) for args in transactions]
         return result
 
 
     async def create_transaction(self, data: TransactionRequestORM) -> TransactionResponseORM:
-        async with PostgreSQLConnectionManager.get_connection() as connection:
+        async with PostgreSQLConnectionManager.get_session() as session:
             transaction_id = uuid4()
             date_now = datetime.now()
-            # await connection.set_type_codec(
-            #     'transaction_type',
-            #     encoder=str,
-            #     decoder=lambda x: TransactionType(x),
-            #     schema='public',
-            # )
-            await connection.execute("INSERT INTO transactions (id, user_id, transaction_type, value, created_at) VALUES ($1, $2, $3, $4, $5)",
-                               transaction_id, data.user_id, data.transaction_type, data.value, date_now)
-        return TransactionResponseORM(transaction_id, UUID(data.user_id), TransactionType(data.transaction_type), data.value, date_now)
+
+            stmt = insert(TransactionORM).values(id=transaction_id,
+                                                 user_id=data.user_id,
+                                                 transaction_type=data.transaction_type,
+                                                 value=data.value,
+                                                 created_at=date_now)
+            await session.execute(stmt)
+        return TransactionResponseORM(transaction_id,
+                                      UUID(data.user_id),
+                                      TransactionType(data.transaction_type),
+                                      data.value,
+                                      date_now)
 
 
     async def move_tokens_transaction(self, data: MoveTransactionRequest) -> bool:
-        try:
-            async with PostgreSQLConnectionManager.get_connection() as connection:
-                id_1 = uuid4()
-                id_2 = uuid4()
-                async with connection.transaction():
-                    await connection.execute("""
-                        INSERT INTO transactions (id, user_id, transaction_type, value, created_at) 
-                        VALUES ($1, $2, $3, $4, $5)""", id_1, data.token_giving_user_id, TransactionType.U2U, -data.value, datetime.now())
-                    await connection.execute("""
-                        INSERT INTO transactions (id, user_id, transaction_type, value, created_at) 
-                        VALUES ($1, $2, $3, $4, $5)""", id_2, data.token_taking_user_id, TransactionType.U2U, data.value, datetime.now())
-        except Exception as e:
-            return False
+        async with PostgreSQLConnectionManager.get_session() as session:
+            async with session.begin():
+                await session.execute(insert(TransactionORM).values(user_id=data.token_taking_user_id,
+                                                     transaction_type=TransactionType.U2U,
+                                                     value=-data.value))
+                await session.execute(insert(TransactionORM).values(user_id=data.token_giving_user_id,
+                                                     transaction_type=TransactionType.U2U,
+                                                     value=data.value))
         return True
 

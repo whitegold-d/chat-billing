@@ -8,7 +8,7 @@ from app.infrastructure.db.model.response.transaction_response import Transactio
 
 class BaseTransactionRepository(ABC):
     @abstractmethod
-    async def get_all_transactions(self, **filters) -> List[TransactionResponseORM]:
+    async def get_all_transactions(self) -> List[TransactionResponseORM]:
         raise NotImplementedError
 
     @abstractmethod

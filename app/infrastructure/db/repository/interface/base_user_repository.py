@@ -19,3 +19,8 @@ class BaseUserRepository(ABC):
     @abstractmethod
     async def save_user(self, user: UserRequestORM) -> UserResponseORM:
         raise NotImplementedError
+
+
+    @abstractmethod
+    async def get_user_by_login(self, login: str) -> Optional[List[UserResponseORM]]:
+        raise NotImplementedError

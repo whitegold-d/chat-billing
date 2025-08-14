@@ -55,7 +55,7 @@ async def get_balance(user_id: str,
 
 @chat_router.post("/users/{user_id}/chat/{chat_id}", response_model=NewMessageResponseDTO)
 async def send_message(user_id: str,
-                       chat_id: int,
+                       chat_id: str,
                        auth_service: AuthServiceDependency,
                        tr_service: TransactionServiceDependency,
                        manager_service: ManagerServiceDependency,
@@ -69,7 +69,7 @@ async def send_message(user_id: str,
     if cur_balance <= 0:
         return JSONResponse(content=ErrorMessage(message=f"Current balance is {cur_balance}, you need to top up your balance").model_dump(),
                             status_code=HTTPStatus.NOT_FOUND)
-    answer = await manager_service.send_message(chat_id, user_id, new_message.text)
+    answer = await manager_service.send_message(user_id=user_id, chat_id=chat_id, new_message=new_message.text)
     return JSONResponse(content=NewMessageResponseDTO.from_answer(answer).model_dump())
 
 

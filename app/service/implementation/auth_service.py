@@ -20,7 +20,7 @@ class AuthService(BaseAuthService):
 
 
     async def login(self, login: str, password: str) -> Optional[UserResponseORM]:
-        users = await self.user_repository.get_all_users(login=login)
+        users = await self.user_repository.get_user_by_login(login=login)
         for user in users:
             if self._verify_password(password=password, hashed_password=user.hashed_password):
                 return user

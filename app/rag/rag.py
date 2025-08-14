@@ -1,14 +1,13 @@
 import uuid
-from typing import Literal, List
-
-from langchain_core.documents import Document
-from langchain_huggingface import HuggingFaceEmbeddings
-from sentence_transformers import SentenceTransformer
-
-from app.infrastructure.db.postgresql_connection_manager import PostgreSQLConnectionManager
+from typing import Literal
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from sentence_transformers import SentenceTransformer
+from sqlalchemy import select, text, insert
+
+from app.infrastructure.db.model.ORM.document_orm import DocumentsORM
+from app.infrastructure.db.postgresql_connection_manager import PostgreSQLConnectionManager
 
 
 class RAG:
@@ -36,23 +35,31 @@ class RAG:
     async def vector_search(self, user_query: str, limit: int = 5):
         query_vector = self._embedding_model.encode_query(user_query, normalize_embeddings=True)
 
-        search_sql = """
-        SELECT id, embedding <=> $1 as distance, text
-        FROM documents
-        ORDER BY distance
-        LIMIT $2        
-        """
+        # search_sql = """
+        # SELECT id, embedding <=> $1 as distance, text
+        # FROM documents
+        # ORDER BY distance
+        # LIMIT $2
+        # """
 
-        async with PostgreSQLConnectionManager.get_connection() as connection:
-            record = await connection.fetch(search_sql, query_vector, limit)
-
-        return record
+        async with PostgreSQLConnectionManager.get_session() as session:
+            stmt = (
+                select(
+                    DocumentsORM.id,
+                    DocumentsORM.embedding.cosine_distance(query_vector).label("distance") ,
+                    DocumentsORM.text
+                ).order_by(
+                    text("distance")
+                ).limit(
+                    limit
+                ))
+            result = await session.execute(stmt)
+            similar_entries = result.all()
+        return similar_entries
 
 
     async def upload_documents(self, document_url: str):
-        insert_document_sql = """
-        INSERT INTO documents (id, text, embedding) VALUES ($1, $2, $3);
-        """
+        insert_document_sql = "INSERT INTO documents (id, text, embedding) VALUES (:id, :text, :embedding);"
 
         print("Document is loading ...")
         loader = PyPDFLoader(document_url)
@@ -65,13 +72,15 @@ class RAG:
 
         print("Vectorizing documents ...")
         vectors = self._embedding_model.encode_document([document.page_content for document in documents])
-        sql_queries = [(uuid.uuid4(), document.page_content, vector) for document, vector in zip(documents, vectors)]
+        print(f"Vector size: {vectors[0]}")
+        sql_queries = [{"id": uuid.uuid4(), "text": document.page_content, "embedding": vector}
+                       for document, vector in zip(documents, vectors)]
 
-        print(f"Vectorizing complete. Inserting documents ...")
-        async with PostgreSQLConnectionManager.get_connection() as connection:
-            await connection.executemany(
+        print(f"Vectorizing completed. Inserting documents ...")
+        async with PostgreSQLConnectionManager.get_session() as session:
+            await session.execute(
                 insert_document_sql,
                 sql_queries
             )
-            records = await connection.fetch("""SELECT * FROM documents""")
+            records = await session.select(DocumentsORM)
         print("Result: ", records)

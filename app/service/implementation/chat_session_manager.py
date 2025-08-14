@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from app.rag.rag import RAG
 from app.service.interface.base_chat_session_manager import BaseChatSessionManager
 from app.service.interface.base_llm_service import BaseLLMService
@@ -20,7 +22,7 @@ class ChatSessionManager(BaseChatSessionManager):
         return cls._self
 
     async def send_message(self, user_id: str, chat_id: str, new_message: str):
-        history = await self.message_service.get_history(chat_id, size=20)
+        history = await self.message_service.get_history(UUID(str(chat_id)), size=20)
         answer = await self.llm_service.execute(
             text=new_message,
             history=[(message.role, message.text) for message in history]

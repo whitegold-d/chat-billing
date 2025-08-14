@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
+from uuid import UUID
 
 from app.infrastructure.db.model.request.move_transaction_request import MoveTransactionRequest
 from app.infrastructure.db.model.request.transaction_request import TransactionRequestORM
@@ -17,4 +18,8 @@ class BaseTransactionRepository(ABC):
 
     @abstractmethod
     async def move_tokens_transaction(self, data: MoveTransactionRequest) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_transactions_by_user_id(self, user_id: UUID) -> List[TransactionResponseORM]:
         raise NotImplementedError

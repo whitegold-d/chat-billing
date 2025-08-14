@@ -16,8 +16,8 @@ class PostgreSQLDatabase(BaseDatabase):
 
 
     async def initialize_db(self) -> None:
-        async with PostgreSQLConnectionManager.get_connection() as conn:
-            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
-            await register_vector(conn)
-            await conn.run_sync(Base.metadata.create_all)
-            await conn.commit()
+        async with PostgreSQLConnectionManager.get_connection() as connection:
+            await connection.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+            # await register_vector(connection)
+            await connection.run_sync(Base.metadata.create_all)
+            await connection.commit()

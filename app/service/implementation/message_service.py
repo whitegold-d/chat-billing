@@ -1,4 +1,5 @@
 from typing import List, Literal
+from uuid import UUID
 
 from app.infrastructure.db.model.request.message_request import MessageRequestORM
 from app.infrastructure.db.model.response.message_response import MessageResponseORM
@@ -16,8 +17,8 @@ class MessageService(BaseMessageService):
         return cls._self
 
 
-    async def get_history(self, chat_id: str, size: int = 20) -> List[MessageResponseORM]:
-        result = await self.message_repository.get_all_messages(chat_id=chat_id)
+    async def get_history(self, chat_id: UUID, size: int = 20) -> List[MessageResponseORM]:
+        result = await self.message_repository.get_messages_by_chat_id(chat_id)
         return result[:size]
 
 

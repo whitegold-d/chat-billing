@@ -5,7 +5,6 @@ from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.db.model.ORM.base import Base
-from app.infrastructure.db.model.ORM.user_orm import UserORM
 
 
 class TransactionORM(Base):

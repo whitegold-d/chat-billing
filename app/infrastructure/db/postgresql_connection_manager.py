@@ -38,6 +38,13 @@ class PostgreSQLConnectionManager:
 
     @classmethod
     @asynccontextmanager
-    def get_session(cls):
+    async def get_session(cls):
         async with cls._async_session_local() as session:
             yield session
+
+
+    @classmethod
+    @asynccontextmanager
+    async def get_connection(cls):
+        async with cls._engine.connect() as connection:
+            yield connection

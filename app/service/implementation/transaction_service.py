@@ -30,17 +30,18 @@ class TransactionService(BaseTransactionService):
 
 
     async def get_current_balance(self, user_id: str) -> int:
-        transactions = await self.transaction_repository.get_all_transactions(user_id=UUID(str(user_id)))
+        transactions = await self.transaction_repository.get_transactions_by_user_id(UUID(str(user_id)))
 
         if not transactions:
             return 0
 
-        result_value = sum(tr["value"] for tr in transactions)
+        result_value = sum(tr.value for tr in transactions)
         return result_value
 
 
     async def move_tokens(self, token_giving_user_id: str, token_taking_user_id: str, value: int) -> bool:
         cur_balance = await self.get_current_balance(token_giving_user_id)
+        print(f"CURRENT BALANCE IS {cur_balance}, value: {value}")
         if cur_balance < value:
             return False
 

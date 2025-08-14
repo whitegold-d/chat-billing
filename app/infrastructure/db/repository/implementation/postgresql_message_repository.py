@@ -1,4 +1,7 @@
+from datetime import datetime
+import uuid
 from typing import List
+from uuid import UUID
 
 import asyncpg
 from sqlalchemy import select, insert
@@ -20,16 +23,47 @@ class PostgreSQLMessageRepository(BaseMessageRepository):
 
 
     async def get_all_messages(self) -> List[MessageResponseORM]:
-        with PostgreSQLConnectionManager.get_session() as session:
+        async with PostgreSQLConnectionManager.get_session() as session:
             stmt = select(MessageORM)
             result = await session.execute(stmt)
-            messages = result.fetchall()
+            messages = result.scalars().all()
 
-        result = [MessageResponseORM(*args) for args in messages]
+        result = [MessageResponseORM(id=message.id,
+                                     chat_id=message.chat_id,
+                                     role=message.role,
+                                     text=message.text,
+                                     created_at=message.created_at) for message in messages]
         return result
 
 
     async def create_message(self, data: MessageRequestORM) -> MessageResponseORM:
-        with PostgreSQLConnectionManager.get_session() as session:
-            stmt = insert(MessageORM).values()
-        return
+        message_id = uuid.uuid4()
+        date_now = datetime.now()
+
+        async with PostgreSQLConnectionManager.get_session() as session:
+            stmt = insert(MessageORM).values(id=message_id,
+                                             chat_id=data.chat_id,
+                                             role=data.role,
+                                             text=data.text,
+                                             created_at=date_now)
+            await session.execute(stmt)
+            await session.commit()
+        return MessageResponseORM(id=message_id,
+                                  chat_id=data.chat_id,
+                                  role=data.role,
+                                  text=data.text,
+                                  created_at=date_now)
+
+
+    async def get_messages_by_chat_id(self, chat_id: UUID) -> List[MessageResponseORM]:
+        async with PostgreSQLConnectionManager.get_session() as session:
+            stmt = select(MessageORM).where(MessageORM.chat_id == chat_id)
+            result = await session.execute(stmt)
+            messages = result.scalars().all()
+
+        result = [MessageResponseORM(id=message.id,
+                                     chat_id=message.chat_id,
+                                     role=message.role,
+                                     text=message.text,
+                                     created_at=message.created_at) for message in messages]
+        return result

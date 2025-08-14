@@ -22,7 +22,7 @@ class PostgreSQLUserRepository(BaseUserRepository):
     async def get_user_by_id(self, user_id: str) -> Optional[UserResponseORM]:
         async with PostgreSQLConnectionManager.get_session() as session:
             stmt = select(UserORM).where(UserORM.id == user_id)
-            result = await session.excecute(stmt)
+            result = await session.execute(stmt)
             user = result.scalar_one_or_none()
 
         if not user:
@@ -48,4 +48,15 @@ class PostgreSQLUserRepository(BaseUserRepository):
                                           name=user.name,
                                           hashed_password=user.hashed_password)
             await session.execute(stmt)
+            await session.commit()
         return UserResponseORM(user_id, user.login, user.name, user.hashed_password)
+
+
+    async def get_user_by_login(self, login: str) -> Optional[List[UserResponseORM]]:
+        async with PostgreSQLConnectionManager.get_session() as session:
+            stmt = select(UserORM).where(UserORM.login == login)
+            result = await session.execute(stmt)
+            users = result.scalars().all()
+
+        result = [UserResponseORM(user.id, user.login, user.name, user.hashed_password) for user in users]
+        return result

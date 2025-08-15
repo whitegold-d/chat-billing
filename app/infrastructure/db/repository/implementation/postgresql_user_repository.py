@@ -1,10 +1,12 @@
 from typing import List, Optional
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 from sqlalchemy import select, insert
+from sqlalchemy.orm import joinedload
 
 from app.infrastructure.db.model.ORM.user_orm import UserORM
 from app.infrastructure.db.model.request.user_request import UserRequestORM
+from app.infrastructure.db.model.response.user_balance_reponse import UserBalanceResponseORM
 from app.infrastructure.db.model.response.user_response import UserResponseORM
 from app.infrastructure.db.postgresql_connection_manager import PostgreSQLConnectionManager
 from app.infrastructure.db.repository.interface.base_user_repository import BaseUserRepository
@@ -60,3 +62,20 @@ class PostgreSQLUserRepository(BaseUserRepository):
 
         result = [UserResponseORM(user.id, user.login, user.name, user.hashed_password) for user in users]
         return result
+
+
+    async def get_user_balance(self, user_id: UUID) -> Optional[UserBalanceResponseORM]:
+        async with PostgreSQLConnectionManager.get_session() as session:
+            stmt = select(UserORM).where(UserORM.id == user_id).options(joinedload(UserORM.transactions))
+            result = await session.execute(stmt)
+            row = result.unique().fetchone()
+
+            if not row:
+                return None
+
+            result = row[0]
+            return UserBalanceResponseORM(result.id,
+                                          result.login,
+                                          result.name,
+                                          sum(t.value for t in result.transactions),
+                                          result.transactions)

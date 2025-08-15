@@ -16,7 +16,6 @@ async def lifespan(app: FastAPI):
     RAG()
     await current_db.initialize_db()
     yield
-    await current_db.close_db()
 
 
 app = FastAPI(title="billing-app", description="", version="1.0", lifespan=lifespan)

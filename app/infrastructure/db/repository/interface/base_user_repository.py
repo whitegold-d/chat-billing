@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
+from uuid import UUID
 
 from app.infrastructure.db.model.request.user_request import UserRequestORM
+from app.infrastructure.db.model.response.user_balance_reponse import UserBalanceResponseORM
 from app.infrastructure.db.model.response.user_response import UserResponseORM
 
 
@@ -23,4 +25,9 @@ class BaseUserRepository(ABC):
 
     @abstractmethod
     async def get_user_by_login(self, login: str) -> Optional[List[UserResponseORM]]:
+        raise NotImplementedError
+
+
+    @abstractmethod
+    async def get_user_balance(self, user_id: UUID) -> Optional[UserBalanceResponseORM]:
         raise NotImplementedError

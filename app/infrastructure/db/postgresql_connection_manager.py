@@ -1,12 +1,13 @@
 from contextlib import asynccontextmanager
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from app.backend import settings
+
+from app.utils.settings import Settings
 
 
 class PostgreSQLConnectionManager:
     _engine = create_async_engine(
-        url=settings.db_dsn,
+        url=Settings().db_dsn,
         echo=True,
         pool_size=10,
     )

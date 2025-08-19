@@ -1,5 +1,4 @@
-from dataclasses import Field
-
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
@@ -12,4 +11,5 @@ class Settings(BaseSettings):
 
     @property
     def db_dsn(self):
-        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        # return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return f"postgresql+asyncpg://dev_user:pass@localhost:5432/my_app_dev"

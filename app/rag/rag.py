@@ -3,8 +3,9 @@ from typing import Literal
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pgvector import Vector
 from sentence_transformers import SentenceTransformer
-from sqlalchemy import select, text, insert
+from sqlalchemy import select, text
 
 from app.infrastructure.db.model.ORM.document_orm import DocumentsORM
 from app.infrastructure.db.postgresql_connection_manager import PostgreSQLConnectionManager
@@ -46,7 +47,7 @@ class RAG:
             stmt = (
                 select(
                     DocumentsORM.id,
-                    DocumentsORM.embedding.cosine_distance(query_vector).label("distance") ,
+                    DocumentsORM.embedding.cosine_distance(query_vector).label("distance"),
                     DocumentsORM.text
                 ).order_by(
                     text("distance")
@@ -72,15 +73,18 @@ class RAG:
 
         print("Vectorizing documents ...")
         vectors = self._embedding_model.encode_document([document.page_content for document in documents])
-        print(f"Vector size: {vectors[0]}")
-        sql_queries = [{"id": uuid.uuid4(), "text": document.page_content, "embedding": vector}
+        sql_queries = [{"id": uuid.uuid4(), "text": document.page_content, "embedding": str(vector.tolist())}
                        for document, vector in zip(documents, vectors)]
 
         print(f"Vectorizing completed. Inserting documents ...")
         async with PostgreSQLConnectionManager.get_session() as session:
             await session.execute(
-                insert_document_sql,
+                text(insert_document_sql),
                 sql_queries
             )
-            records = await session.select(DocumentsORM)
-        print("Result: ", records)
+            await session.commit()
+
+            stmt = select(DocumentsORM)
+            results = await session.execute(stmt)
+            documents = results.all()
+        print("Result: ", documents)

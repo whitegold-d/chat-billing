@@ -2,9 +2,7 @@ from typing import Annotated, Optional
 
 from fastapi import Depends, Header
 
-from app.infrastructure.db.repository.implementation.in_memory_user_repository import InMemoryUserRepository
 from app.infrastructure.db.repository.implementation.postgresql_user_repository import PostgreSQLUserRepository
-from app.infrastructure.db.repository.implementation.sqlite_user_repository import SQLiteUserRepository
 from app.infrastructure.db.repository.interface.base_user_repository import BaseUserRepository
 from app.interface.http.model.response.auth_response_dto import UserResponseSchemaDTO
 from app.service.implementation.auth_service import AuthService

@@ -8,6 +8,6 @@ from uuid import UUID
 class MessageResponseORM:
     id: UUID
     chat_id: str
-    role: Literal["assistant", "human"]
+    role: Literal["assistant", "human", "tool"]
     text: str
     created_at: datetime

@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from app.rag.rag import RAG
+from app.service.interface.base_agent_service import BaseAgentService
 from app.service.interface.base_chat_session_manager import BaseChatSessionManager
 from app.service.interface.base_llm_service import BaseLLMService
 from app.service.interface.base_message_service import BaseMessageService
@@ -11,21 +12,21 @@ class ChatSessionManager(BaseChatSessionManager):
     _self = None
     def __new__(cls, message_service: BaseMessageService,
                 tr_service: BaseTransactionService,
-                llm_service: BaseLLMService,
+                agent_service: BaseAgentService,
                 rag_service: RAG):
         if cls._self is None:
             cls._self = super().__new__(cls)
             cls._self.message_service = message_service
             cls._self.tr_service = tr_service
-            cls._self.llm_service = llm_service
             cls._self.rag_service = rag_service
+            cls._self.agent_service = agent_service
         return cls._self
 
     async def send_message(self, user_id: str, chat_id: str, new_message: str):
         history = await self.message_service.get_history(UUID(str(chat_id)), size=20)
-        answer = await self.llm_service.execute(
+        answer = await self.agent_service.execute(
             text=new_message,
-            history=[(message.role, message.text) for message in history]
+            history=history
         )
 
         await self.message_service.create_message(chat_id, "human", new_message)

@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
+    "arize-phoenix>=11.30.0",
     "asyncpg>=0.30.0",
     "bcrypt>=4.3.0",
     "fastapi[standard]>=0.116.1",
@@ -12,6 +13,7 @@ dependencies = [
     "langchain-huggingface>=0.3.1",
     "langchain-openai>=0.3.28",
     "langgraph>=0.6.6",
+    "openinference-instrumentation-langchain>=0.1.51",
     "pandas>=2.3.2",
     "passlib>=1.7.4",
     "pgvector>=0.4.1",
